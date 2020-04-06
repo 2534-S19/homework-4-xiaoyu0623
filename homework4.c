@@ -53,33 +53,31 @@ int main(void)
 
         // TODO: If an actual character was received, echo the character to the terminal AND use it to update the FSM.
         //       Check the transmit interrupt flag prior to transmitting the character.
-        finished =charFSM(rChar);
-        if(UART_getInterruptStatus(EUSCI_A0_BASE, EUSCI_A_UART_TRANSMIT_INTERRUPT_FLAG) == EUSCI_A_UART_TRANSMIT_INTERRUPT_FLAG)
-        {
-            UART_transmitData(EUSCI_A0_BASE, rChar);
-        }
+            finished =charFSM(rChar);
+            if(UART_getInterruptStatus(EUSCI_A0_BASE, EUSCI_A_UART_TRANSMIT_INTERRUPT_FLAG) == EUSCI_A_UART_TRANSMIT_INTERRUPT_FLAG)
+            {
+                UART_transmitData(EUSCI_A0_BASE, rChar);
+            }
 
 
         // TODO: If the FSM indicates a successful string entry, transmit the response string.
         //       Check the transmit interrupt flag prior to transmitting each character and moving on to the next one.
         //       Make sure to reset the success variable after transmission.
-        if(finished==true)
-        {
-            int index = 0;
-            while(response[index] != '\0')
+            if(finished==true)
             {
-                if(UART_getInterruptStatus(EUSCI_A0_BASE, EUSCI_A_UART_TRANSMIT_INTERRUPT_FLAG) == EUSCI_A_UART_TRANSMIT_INTERRUPT_FLAG)
+                int index = 0;
+                while(response[index] != '\0')
                 {
-                    UART_transmitData(EUSCI_A0_BASE, response[index]);
-                    index++;
+                    if(UART_getInterruptStatus(EUSCI_A0_BASE, EUSCI_A_UART_TRANSMIT_INTERRUPT_FLAG) == EUSCI_A_UART_TRANSMIT_INTERRUPT_FLAG)
+                    {
+                        UART_transmitData(EUSCI_A0_BASE, response[index]);
+                        index++;
+                    }
                 }
             }
         }
-
-
-        }
     }
-
+    return 0xFF;
 }
 
 void initBoard()
@@ -103,30 +101,42 @@ bool charFSM(char rChar)
             {
                 current_state = START;
             }
+            break;
         case SP2:
             if(rChar == '5')
             {
                 current_state = SP25;
             }
+            else if(rChar == '2')
+            {
+                current_state = SP2;
+            }
             else
             {
                 current_state = START;
             }
+            break;
         case SP25:
             if(rChar == '3')
             {
                 current_state = SP253;
             }
+            else if(rChar == '2')
+            {
+                current_state = SP2;
+            }
             else
             {
                 current_state = START;
             }
+            break;
         case SP253:
             if(rChar == '4')
             {
                 finished =true;
                 current_state = START;
             }
+            break;
     }
 
     return finished;
